@@ -1,17 +1,30 @@
-// Uncomment the code below and write your tests
-/* import axios from 'axios';
-import { throttledGetDataFromApi } from './index'; */
+import axios from 'axios';
+import { throttledGetDataFromApi } from './index';
+
+const BASE_URL = 'https://jsonplaceholder.typicode.com';
+
+jest.mock('lodash', () => ({
+  throttle: (fn: () => unknown) => fn,
+}));
 
 describe('throttledGetDataFromApi', () => {
   test('should create instance with provided base url', async () => {
-    // Write your test here
+    jest.spyOn(axios, 'create');
+    await throttledGetDataFromApi('/posts/1');
+    expect(axios.create).toHaveBeenCalledWith({ baseURL: BASE_URL });
   });
 
   test('should perform request to correct provided url', async () => {
-    // Write your test here
+    const mockedGet = jest.fn().mockResolvedValue({ data: {} });
+    axios.create = jest.fn().mockReturnValue({ get: mockedGet });
+    await throttledGetDataFromApi('/posts/1');
+    expect(mockedGet).toHaveBeenCalledWith('/posts/1');
   });
 
   test('should return response data', async () => {
-    // Write your test here
+    const mockedGet = jest.fn().mockResolvedValue({ data: { id: '1' } });
+    axios.create = jest.fn().mockReturnValue({ get: mockedGet });
+    const result = await throttledGetDataFromApi('/posts/1');
+    expect(result).toEqual({ id: '1' });
   });
 });
